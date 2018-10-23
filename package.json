@@ -1,0 +1,11 @@
+{
+  "name": "pong",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "laharrell20XX <lharrell@basecampcodingacademy.org>",
+  "license": "MIT",
+  "dependencies": {
+    "jest": "^23.6.0",
+    "matter-js": "^0.14.2"
+  }
+}
