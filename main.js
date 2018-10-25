@@ -5,24 +5,21 @@
 //         canvasCtx.fillRect(bx, by, 10, 10);
 //     }
 // }
+const W = 1192;
+const H = 600;
 var bx = 596; // ball's pos on the x axis
 var by = 300; // ball's pos on the y axis
 const px = 1182;
-var py = 300 - 600 * 0.1;
-var paddleHeight = 600 * 0.25;
+var py = 300 - H * 0.1;
+var paddleHeight = H * 0.25;
 var moveRight = true; // state of movement on the ball, if true, ball is moving right; if false ball is moving left
 var tickRate = 1000;
 
 window.onload = function() {
     var canvas = this.document.querySelector("canvas.world");
     var canvasCtx = canvas.getContext("2d");
-    canvasCtx.fillRect(by, bx, 10, 10);
-    canvasCtx.fillRect(
-        1182,
-        300 - canvas.height * 0.1,
-        10,
-        canvas.height * 0.25
-    );
+    canvasCtx.fillRect(bx, by, 10, 10);
+    canvasCtx.fillRect(px, py, 10, paddleHeight);
     window.addEventListener("keypress", function(ev) {
         movePaddle(ev);
     });
@@ -33,9 +30,29 @@ function pong() {
     canvas = this.document.querySelector("canvas.world");
     var canvasCtx = canvas.getContext("2d");
     canvasCtx.clearRect(bx, by, 10, 10);
-    if (moveRight && bx < canvas.width - 10) {
+    function reset() {
+        canvasCtx.clearRect(0, 0, W, H);
+        bx = 596;
+        by = 300;
+        py = 300 - 600 * 0.1;
+        paddleHeight = 600 * 0.25;
+        moveRight = true;
+        tickRate = 1000;
+        canvasCtx.fillRect(bx, by, 10, 10);
+        canvasCtx.fillRect(px, py, 10, paddleHeight);
+    }
+    if (moveRight) {
         bx += 5;
         canvasCtx.fillRect(bx, by, 10, 10);
+        if (py <= by && by <= py + paddleHeight && bx >= canvas.width - 25) {
+            // checks if the ball will touch the paddle {
+            // if the ball hits the paddle start moving the paddle left
+            console.log("good hit");
+            moveRight = false;
+        }
+        if (bx >= canvas.width) {
+            reset();
+        }
     } else {
         moveRight = false; // keeps the ball from moving right
         bx -= 5;
