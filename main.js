@@ -14,11 +14,12 @@ var py = 300 - H * 0.1;
 var paddleHeight = H * 0.25;
 var moveRight = true; // state of movement on the ball, if true, ball is moving right; if false ball is moving left
 var tickRate = 1000;
+// var angleOfY = 0;
+var moveUp = true;
 
 window.onload = function() {
     var canvas = this.document.querySelector("canvas.world");
     var canvasCtx = canvas.getContext("2d");
-    canvasCtx.fillRect(bx, by, 10, 10);
     canvasCtx.fillRect(px, py, 10, paddleHeight);
     window.addEventListener("keypress", function(ev) {
         movePaddle(ev);
@@ -32,36 +33,59 @@ function pong() {
     canvasCtx.clearRect(bx, by, 10, 10);
     function reset() {
         canvasCtx.clearRect(0, 0, W, H);
-        bx = 596;
-        by = 300;
+        bx = W / 2;
+        by = H / 2;
         py = 300 - 600 * 0.1;
         paddleHeight = 600 * 0.25;
         moveRight = true;
         tickRate = 1000;
-        canvasCtx.fillRect(bx, by, 10, 10);
         canvasCtx.fillRect(px, py, 10, paddleHeight);
+        // angleOfY = 0;
     }
-    if (moveRight) {
-        bx += 5;
-        canvasCtx.fillRect(bx, by, 10, 10);
-        if (py <= by && by <= py + paddleHeight && bx >= canvas.width - 25) {
-            // checks if the ball will touch the paddle {
-            // if the ball hits the paddle start moving the paddle left
-            console.log("good hit");
-            moveRight = false;
+    function ballMovX() {
+        if (moveRight) {
+            bx += 5;
+            if (
+                py <= by &&
+                by <= py + paddleHeight &&
+                bx >= canvas.width - 25
+            ) {
+                // checks if the ball will touch the paddle {
+                // if the ball hits the paddle start moving the paddle left
+                console.log("good hit");
+                moveRight = false;
+                // angleOfY = ((py - by) / 10) % 15;
+            }
+            if (bx >= canvas.width) {
+                reset();
+            }
+        } else {
+            moveRight = false; // keeps the ball from moving right
+            bx -= 5;
+            if (bx - 5 < 0) {
+                // ball's x is less than the canvas size
+                moveRight = true; // ball moves right again
+            }
         }
-        if (bx >= canvas.width) {
-            reset();
-        }
-    } else {
-        moveRight = false; // keeps the ball from moving right
-        bx -= 5;
-        if (bx - 5 < 0) {
-            // ball's x is less than the canvas size
-            moveRight = true; // ball moves right again
-        }
-        canvasCtx.fillRect(bx, by, 10, 10);
     }
+    function ballMovY() {
+        if (0 <= by && moveUp) {
+            // by -= angleOfY;
+            by -= 1;
+        } else {
+            moveUp = false;
+            if (by + 10 >= H) {
+                console.log(by);
+                moveUp = true;
+            } else {
+                // by += angleOfY;
+                by += 1;
+            }
+        }
+    }
+    ballMovX();
+    ballMovY();
+    canvasCtx.fillRect(bx, by, 10, 10);
 }
 
 function movePaddle(ev) {
