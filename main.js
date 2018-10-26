@@ -14,7 +14,7 @@ var py = 300 - H * 0.1;
 var paddleHeight = H * 0.25;
 var moveRight = true; // state of movement on the ball, if true, ball is moving right; if false ball is moving left
 var tickRate = 1000;
-// var angleOfY = 0;
+var angleOfY = 0;
 var moveUp = true;
 
 window.onload = function() {
@@ -40,7 +40,7 @@ function pong() {
         moveRight = true;
         tickRate = 1000;
         canvasCtx.fillRect(px, py, 10, paddleHeight);
-        // angleOfY = 0;
+        angleOfY = 0;
     }
     function ballMovX() {
         if (moveRight) {
@@ -54,7 +54,14 @@ function pong() {
                 // if the ball hits the paddle start moving the paddle left
                 console.log("good hit");
                 moveRight = false;
-                // angleOfY = ((py - by) / 10) % 15;
+                angleOfY = Math.ceil((by - py - 70) / 15);
+                // var dy = Math.ceil((by - py - 70) / 15);
+                // if (dy > 0) {
+                //     angleOfY = Math.ceil(dy);
+                // } else {
+                //     angleOfY = Math.floor(dy);
+                // }
+                console.log(angleOfY);
             }
             if (bx >= canvas.width) {
                 reset();
@@ -70,16 +77,16 @@ function pong() {
     }
     function ballMovY() {
         if (0 <= by && moveUp) {
-            // by -= angleOfY;
-            by -= 1;
+            by -= angleOfY;
+            // by -= 1;
         } else {
             moveUp = false;
-            if (by + 10 >= H) {
+            if (by + 10 >= H - angleOfY) {
                 console.log(by);
                 moveUp = true;
             } else {
-                // by += angleOfY;
-                by += 1;
+                by += angleOfY;
+                //by += 1;
             }
         }
     }
