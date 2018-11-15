@@ -17,6 +17,7 @@ var Engine = Matter.Engine
 var Bodies = Matter.Bodies
 var World = Matter.World
 var Composite = Matter.Composite
+var Body = Matter.Body
 
 
 //creates an engine and sets defaults of the world
@@ -26,12 +27,13 @@ engine.world.gravity.y = 0
 
 
 // creates the pong objects and adds them to the world
-var pongBall = Bodies.rectangle(W / 2, H / 2, 10, 10) // only keeps track of initial ball creation
-World.add(engine.world, [pongBall])
+var pongBall = Bodies.rectangle(W / 2 - 5, H / 2 - 5, 10, 10, { frictionAir: 0 })
+var floor = Bodies.rectangle(0, 0, W * 2, 1, { isStatic: true })
+var ceiling = Bodies.rectangle(0, H, W * 2, 1, { isStatic: true })
+var rightPaddle = Bodies.rectangle(W - 10, 300 - H * 0.1, 10, H * 0.25, { frictionAir: 0 })
+Body.applyForce(pongBall, pongBall.position, { x: .001, y: 0 }) // only keeps track of initial ball creation
+World.add(engine.world, [rightPaddle, pongBall, floor, ceiling])
 
-
-var bx = pongBall.position.x; // ball's pos on the x axis
-var by = pongBall.position.y; // ball's pos on the y axis
 // const px = 1182;
 // var py = 300 - H * 0.1;
 // var paddleHeight = H * 0.25;
@@ -40,15 +42,40 @@ var by = pongBall.position.y; // ball's pos on the y axis
 // var moveUp = true;
 
 window.onload = function () {
-    // window.addEventListener("keypress", function (ev) {
-    //     movePaddle(ev);
-    // });
+    window.addEventListener("keydown", function (ev) {
+        movePaddle(ev);
+    });
 
-    this.setInterval(newPong, tickRate / 60); // 30 times per second
+    this.setInterval(() => {
+        newPong()
+    }, tickRate / 60); // 30 times per second
 };
+
+function movePaddle(ev) {
+    switch (ev.key) {
+        case "ArrowUp":
+            Body.applyForce(rightPaddle, rightPaddle.position, { x: 0, y: -0.002 })
+            break
+        case "ArrowDown":
+            Body.applyForce(rightPaddle, rightPaddle.position, { x: 0, y: 0.002 })
+            break
+    }
+
+}
 
 // start of newPong function
 function newPong() {
+    render()
+    if (pongBall.position.x >= W) {
+        reset()
+    }
+}
+
+function reset() {
+    Body.setPosition(pongBall, { x: W / 2 - 5, y: H / 2 - 5 })
+}
+
+function render() {
     var bodies = Composite.allBodies(engine.world);
     Engine.update(engine, 1000 / 60)
 
@@ -71,98 +98,3 @@ function newPong() {
     canvasCtx.fillStyle = "white"
     canvasCtx.fill();
 }
-
-
-// function pong() {
-//     Engine.update(engine, 1000 / 60)
-//     canvas = this.document.querySelector("canvas.world");
-//     var canvasCtx = canvas.getContext("2d");
-//     canvasCtx.clearRect(bx, by, 10, 10);
-//     function reset() {
-//         canvasCtx.clearRect(0, 0, W, H);
-//         bx = W / 2;
-//         by = H / 2;
-//         py = 300 - 600 * 0.1;
-//         paddleHeight = 600 * 0.25;
-//         moveRight = true;
-//         tickRate = 1000;
-//         canvasCtx.fillRect(px, py, 10, paddleHeight);
-//         angleOfY = 0;
-//     }
-//     function ballMovX() {
-//         if (moveRight) {
-//             bx += 5;
-//             if (
-//                 py <= by &&
-//                 by <= py + paddleHeight &&
-//                 bx >= canvas.width - 25
-//             ) {
-//                 // checks if the ball will touch the paddle {
-//                 // if the ball hits the paddle start moving the paddle left
-//                 console.log("good hit");
-//                 moveRight = false;
-//                 angleOfY = Math.ceil((by - py - 70) / 15);
-//                 // var dy = Math.ceil((by - py - 70) / 15);
-//                 // if (dy > 0) {
-//                 //     angleOfY = Math.ceil(dy);
-//                 // } else {
-//                 //     angleOfY = Math.floor(dy);
-//                 // }
-//                 console.log(angleOfY);
-//             }
-//             if (bx >= canvas.width) {
-//                 reset();
-//             }
-//         } else {
-//             moveRight = false; // keeps the ball from moving right
-//             bx -= 5;
-//             if (bx - 5 < 0) {
-//                 // ball's x is less than the canvas size
-//                 moveRight = true; // ball moves right again
-//             }
-//         }
-//     }
-//     function ballMovY() {
-//         if (0 <= by && moveUp) {
-//             by -= angleOfY;
-//             // by -= 1;
-//         } else {
-//             moveUp = false;
-//             if (by + 10 >= H - angleOfY) {
-//                 console.log(by);
-//                 moveUp = true;
-//             } else {
-//                 by += angleOfY;
-//                 //by += 1;
-//             }
-//         }
-//     }
-//     ballMovX();
-//     ballMovY();
-//     canvasCtx.fillRect(bx, by, 10, 10);
-// }
-
-// function movePaddle(ev) {
-//     canvas = this.document.querySelector("canvas.world");
-//     var canvasCtx = canvas.getContext("2d");
-//     switch (ev.key) {
-//         case "ArrowDown":
-//             if (py >= canvas.height - paddleHeight) {
-//                 break;
-//             } else {
-//                 canvasCtx.clearRect(px, py, 10, paddleHeight);
-//                 py += 10;
-//                 canvasCtx.fillRect(px, py, 10, paddleHeight);
-//                 break;
-//             }
-//         case "ArrowUp":
-//             if (py <= 0) {
-//                 break;
-//             } else {
-//                 canvasCtx.clearRect(px, py, 10, paddleHeight);
-//                 py -= 10;
-//                 canvasCtx.fillRect(px, py, 10, paddleHeight);
-//                 break;
-//             }
-//     }
-// }
