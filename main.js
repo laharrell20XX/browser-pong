@@ -5,6 +5,7 @@
 //         canvasCtx.fillRect(bx, by, 10, 10);
 //     }
 // }
+
 const W = 1192;
 const H = 600;
 var bx = 596; // ball's pos on the x axis
@@ -16,12 +17,14 @@ var moveRight = true; // state of movement on the ball, if true, ball is moving 
 var tickRate = 1000;
 var angleOfY = 0;
 var moveUp = true;
+var hitTop = false;
+var hitBottom = false;
 
-window.onload = function() {
+window.onload = function () {
     var canvas = this.document.querySelector("canvas.world");
     var canvasCtx = canvas.getContext("2d");
     canvasCtx.fillRect(px, py, 10, paddleHeight);
-    window.addEventListener("keypress", function(ev) {
+    window.addEventListener("keydown", function (ev) {
         movePaddle(ev);
     });
     this.setInterval(pong, tickRate / 60); // 30 times per second
@@ -31,6 +34,7 @@ function pong() {
     canvas = this.document.querySelector("canvas.world");
     var canvasCtx = canvas.getContext("2d");
     canvasCtx.clearRect(bx, by, 10, 10);
+
     function reset() {
         canvasCtx.clearRect(0, 0, W, H);
         bx = W / 2;
@@ -41,7 +45,11 @@ function pong() {
         tickRate = 1000;
         canvasCtx.fillRect(px, py, 10, paddleHeight);
         angleOfY = 0;
+        hitTop = false;
+        hitBottom = false;
+
     }
+
     function ballMovX() {
         if (moveRight) {
             bx += 5;
@@ -51,17 +59,15 @@ function pong() {
                 bx >= canvas.width - 25
             ) {
                 // checks if the ball will touch the paddle {
-                // if the ball hits the paddle start moving the paddle left
+                // if the ball hits the paddle start moving the ball left
                 console.log("good hit");
                 moveRight = false;
-                angleOfY = Math.ceil((by - py - 70) / 15);
-                // var dy = Math.ceil((by - py - 70) / 15);
-                // if (dy > 0) {
-                //     angleOfY = Math.ceil(dy);
-                // } else {
-                //     angleOfY = Math.floor(dy);
-                // }
-                console.log(angleOfY);
+                angleOfY = -Math.ceil((by - py - 70) / 15);
+                if (Math.abs(angleOfY) == 0) {
+                    /* if ball hits center of paddle launch ball in 
+                    random direction */
+                    angleOfY = [-1, 1][Math.floor(Math.random() * 2)];
+                }
             }
             if (bx >= canvas.width) {
                 reset();
@@ -75,20 +81,45 @@ function pong() {
             }
         }
     }
+
     function ballMovY() {
-        if (0 <= by && moveUp) {
-            by -= angleOfY;
-            // by -= 1;
-        } else {
-            moveUp = false;
-            if (by + 10 >= H - angleOfY) {
-                console.log(by);
-                moveUp = true;
-            } else {
+        if (0 >= by - 10) {
+            // hits the top of the window
+            hitTop = true;
+            hitBottom = false;
+        }
+        if (by + 10 >= H - Math.abs(angleOfY)) {
+            // hits the bottom of the window
+            hitBottom = true;
+            hitTop = false;
+        }
+        if (!hitTop && !hitBottom) {
+            // if both false move in direction of angleOfY
+            by -= angleOfY
+        }
+        if (hitTop) {
+            // if reached top bounds
+            if (angleOfY > 0) {
+                // if hit tb from upper paddle move in direction of aOY
                 by += angleOfY;
-                //by += 1;
+            } else {
+                /* if hit tb from lower paddle move opposite of aOY 
+                (aoY < 0)*/
+                by -= angleOfY;
             }
         }
+        if (hitBottom) {
+            // if reached bottom bounds
+            if (angleOfY > 0) {
+                /* if hit tb from upper paddle move opposite of aOY 
+                (aOY > 0)*/
+                by -= angleOfY;
+            } else {
+                // if hit tb from lower paddle move in direction of aOY
+                by += angleOfY;
+            }
+        }
+
     }
     ballMovX();
     ballMovY();
